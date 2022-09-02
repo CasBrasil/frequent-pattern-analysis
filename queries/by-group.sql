@@ -30,7 +30,7 @@ SALES AS (
 		AND IQVIA."AREAS DA FARMACIA" IN('Cuidado Bebê/Infantil')	
 	GROUP BY SALES.barcode
 	ORDER BY frequency DESC
---	LIMIT 100
+	LIMIT 100
 )
 ,BASKET AS (
 	SELECT DISTINCT SALES.sale_code
