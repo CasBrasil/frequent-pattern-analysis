@@ -1,2 +1,4 @@
 .env
+inputs/*.csv
+
 config.ini
