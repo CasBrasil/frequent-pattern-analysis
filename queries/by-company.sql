@@ -1,11 +1,11 @@
 WITH 
-sales AS (
+SALES AS (
 	SELECT DS.sale_code, DS.barcode 
 	FROM data_sale DS 
 	LEFT JOIN register_store RS ON RS.id = DS.store_id
 	WHERE 
 		RS.retail_chain_id = 1
-		AND DATE BETWEEN (CURRENT_DATE - INTERVAL '1 month') AND CURRENT_DATE
+		AND DATE BETWEEN (CURRENT_DATE - INTERVAL '6 MONTHS') AND CURRENT_DATE
 	ORDER BY DS.sale_code 
 )
 ,FREQ AS (
