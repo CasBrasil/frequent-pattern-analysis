@@ -5,8 +5,8 @@ SALES AS (
 	LEFT JOIN register_store RS ON RS.id = DS.store_id
 	WHERE 
 		RS.retail_chain_id = 1
-		AND DS.store_id = 350 
-		AND DATE BETWEEN (CURRENT_DATE - INTERVAL '3 MONTHS') AND CURRENT_DATE
+		AND DS.store_id = 45 
+		AND DATE BETWEEN (CURRENT_DATE - INTERVAL '6 MONTHS') AND CURRENT_DATE
 	ORDER BY DS.sale_code 
 )
 ,FREQ AS (
