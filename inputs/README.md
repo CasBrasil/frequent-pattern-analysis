@@ -1,0 +1,1 @@
+These files are generated from the SQL files located in the `/queries` folder.
