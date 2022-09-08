@@ -1,54 +1,31 @@
 WITH 
 SALES AS (
-	SELECT 
+	SELECT
 		DS.sale_code
-		,DS.barcode
-		,DSP."name" AS RO_NAME
-		,IQVIA."PRODUTO" AS IQVIA_NAME
-	FROM public.data_sale AS DS
-		LEFT JOIN data_storeproduct AS DSP ON DS.barcode = DSP.barcode
-		LEFT JOIN iqvia_produtos AS IQVIA ON LPAD(DS.barcode::VARCHAR, 15, '0') = IQVIA."EAN"
-		LEFT JOIN register_store AS RS ON DS.store_id = RS.id
-	WHERE
+		,DS.barcode 
+	FROM data_sale DS 
+	LEFT JOIN register_store RS ON RS.id = DS.store_id
+	WHERE 
 		RS.retail_chain_id = 1
-		AND DS.store_id = 350
-		AND DATE BETWEEN (CURRENT_DATE - INTERVAL '5 days') AND CURRENT_DATE
-	GROUP BY 
-		DS.sale_code  
-		,DS.barcode
-		,RO_NAME
-		,IQVIA_NAME
-	ORDER BY sale_code
+		AND DS.store_id = 45
+		AND DATE BETWEEN (CURRENT_DATE - INTERVAL '6 MONTHS') AND CURRENT_DATE
+	GROUP BY DS.sale_code, DS.barcode
+	ORDER BY DS.sale_code
 )
-,FREQ AS (
-	SELECT SALES.barcode, COUNT(1) AS frequency 
+,MANUFACTURER AS (
+	SELECT SALES.barcode 
 	FROM SALES
-	LEFT JOIN data_storeproduct AS DSP ON SALES.barcode = DSP.barcode 
-	WHERE DSP.factory ILIKE '%UP VITAM%'
---	WHERE DSP.factory ILIKE ANY(ARRAY['%UP VITAM%', '%CHRYSALIS%'])
+	LEFT JOIN data_storeproduct DSP ON SALES.barcode = DSP.barcode 
+	WHERE
+--		DSP.factory ILIKE '%UP VITAM%'
+		DSP.factory ILIKE ANY(ARRAY['%UP VITAM%', '%CHRYSALIS%'])	
 	GROUP BY SALES.barcode
-	ORDER BY frequency DESC
-	LIMIT 100
 )
 ,BASKET AS (
 	SELECT DISTINCT SALES.sale_code
 	FROM SALES
-	INNER JOIN FREQ ON SALES.barcode = FREQ.barcode
+	INNER JOIN MANUFACTURER ON MANUFACTURER.barcode = SALES.barcode
 )
-SELECT sale_code, barcode 
-FROM (
-	SELECT
-		SALES.sale_code
-		,SALES.barcode
-		,SALES.RO_NAME
-		,SALES.IQVIA_NAME
-	FROM SALES
-	INNER JOIN BASKET ON BASKET.sale_code = SALES.sale_code
-	WHERE NOT(SALES.RO_NAME IS NULL AND SALES.IQVIA_NAME IS NULL)
-	GROUP BY 
-		SALES.sale_code
-		,SALES.barcode
-		,SALES.RO_NAME
-		,SALES.IQVIA_NAME
-	ORDER BY sale_code
-) AS SALES_BY_MANUFACTURER;
+SELECT SALES.sale_code, SALES.barcode
+FROM SALES
+INNER JOIN BASKET ON BASKET.sale_code = SALES.sale_code;

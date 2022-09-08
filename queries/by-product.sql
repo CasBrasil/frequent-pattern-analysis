@@ -1,56 +1,33 @@
 WITH 
 SALES AS (
-	SELECT 
+	SELECT
 		DS.sale_code
-		,DS.barcode
-		,DSP."name" AS RO_NAME
-		,IQVIA."PRODUTO" AS IQVIA_NAME
-	FROM public.data_sale AS DS
-		LEFT JOIN data_storeproduct AS DSP ON DS.barcode = DSP.barcode
-		LEFT JOIN iqvia_produtos AS IQVIA ON LPAD(DS.barcode::VARCHAR, 15, '0') = IQVIA."EAN"
-		LEFT JOIN register_store AS RS ON DS.store_id = RS.id
-	WHERE
-		RS.retail_chain_id = 1
-		AND DS.store_id = 350
-		AND DATE BETWEEN (CURRENT_DATE - INTERVAL '5 days') AND CURRENT_DATE
-	GROUP BY 
-		DS.sale_code  
-		,DS.barcode
-		,RO_NAME
-		,IQVIA_NAME
-	ORDER BY sale_code
-)
-,FREQ AS (
-	SELECT SALES.barcode, COUNT(1) AS frequency 
-	FROM SALES
-	LEFT JOIN data_storeproduct AS DSP ON SALES.barcode = DSP.barcode 
-	LEFT JOIN iqvia_produtos AS IQVIA ON LPAD(DSP.barcode::VARCHAR, 15, '0') = IQVIA."EAN"
+		,DS.barcode 
+	FROM data_sale DS 
+	LEFT JOIN register_store RS ON RS.id = DS.store_id
 	WHERE 
-		SALES.RO_NAME = 'TAXA DE ENTREGA'
---		SALES.barcode = '123'
---		SALES.IQVIA_NAME = 'UPVITAM XYZ'	
+		RS.retail_chain_id = 1
+		AND DS.store_id = 45
+		AND DATE BETWEEN (CURRENT_DATE - INTERVAL '1 YEAR') AND CURRENT_DATE
+	GROUP BY DS.sale_code, DS.barcode
+	ORDER BY DS.sale_code
+)
+,PRODUCT AS (
+	SELECT SALES.barcode 
+	FROM SALES
+--	LEFT JOIN data_storeproduct DSP ON SALES.barcode = DSP.barcode 
+--	LEFT JOIN iqvia_produtos IP ON LPAD(SALES.barcode::VARCHAR, 15, '0') = IP."EAN"
+	WHERE 
+--		TRIM(DSP."name") = 'TAXA DE ENTREGA'
+--		TRIM(IP."PRODUTO") = 'AAS CPR ADULTO 500MG x 24'
+		SALES.barcode = '7896138700515' -- SORO FISIOLOGICO 250ML - CHRYSALIS
 	GROUP BY SALES.barcode
-	ORDER BY frequency DESC
-	LIMIT 100
 )
 ,BASKET AS (
 	SELECT DISTINCT SALES.sale_code
 	FROM SALES
-	INNER JOIN FREQ ON SALES.barcode = FREQ.barcode
+	INNER JOIN PRODUCT ON PRODUCT.barcode = SALES.barcode
 )
-SELECT sale_code, barcode 
-FROM (
-	SELECT
-		SALES.sale_code
-		,SALES.barcode
-		,SALES.RO_NAME
-		,SALES.IQVIA_NAME
-	FROM SALES
-	INNER JOIN BASKET ON BASKET.sale_code = SALES.sale_code
-	GROUP BY 
-		SALES.sale_code
-		,SALES.barcode
-		,SALES.RO_NAME
-		,SALES.IQVIA_NAME
-	ORDER BY sale_code
-) AS SALES_BY_PRODUCT;
+SELECT SALES.sale_code, SALES.barcode
+FROM SALES
+INNER JOIN BASKET ON BASKET.sale_code = SALES.sale_code;
