@@ -8,7 +8,7 @@ SALES AS (
 	WHERE 
 		RS.retail_chain_id = 1
 		AND DS.store_id = 45
-		AND DATE BETWEEN (CURRENT_DATE - INTERVAL '6 MONTHS') AND CURRENT_DATE
+		AND DATE BETWEEN (CURRENT_DATE - INTERVAL '3 MONTHS') AND CURRENT_DATE
 	GROUP BY DS.sale_code, DS.barcode
 	ORDER BY DS.sale_code
 )
@@ -17,8 +17,8 @@ SALES AS (
 	FROM SALES
 	LEFT JOIN data_storeproduct DSP ON SALES.barcode = DSP.barcode 
 	WHERE
---		DSP.factory ILIKE '%UP VITAM%'
-		DSP.factory ILIKE ANY(ARRAY['%UP VITAM%', '%CHRYSALIS%'])	
+		DSP.factory ILIKE '%CATARINENSE%'
+--		DSP.factory ILIKE ANY(ARRAY['%UP VITAM%', '%CHRYSALIS%'])	
 	GROUP BY SALES.barcode
 )
 ,BASKET AS (
