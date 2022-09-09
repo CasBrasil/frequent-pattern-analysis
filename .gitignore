@@ -1,4 +1,4 @@
 .env
 config.ini
 inputs/*.csv
-outputs/by-factory/*csv
+outputs/*/*csv
